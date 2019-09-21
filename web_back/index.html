@@ -93,6 +93,8 @@
     </div>
     <!-- /.modal-dialog -->
   </div>
+  <script src="./lib/bootstrap/js/utils/config.js"></script>
+  <script src="./lib/bootstrap/js/utils/user.js"></script>
 
   <script>
     var $level01 = $('.level01');
@@ -172,34 +174,37 @@
 
   <script>
 
-
-    
     $(function () {
       var userName = $('#userName').html();
       var userImg = $('#userImg').attr('src');
-      
+
       //将管理员信息呈现到网页
-      $.get('http://localhost:8000/admin/getuser',{nickname:userName,user_pic:userImg},function(res){
+      // $.get('http://localhost:8000/admin/getuser', { nickname: userName, user_pic: userImg }, function (res) {
+      //   console.log(res);
+      //   $('#userName').html(res.data.nickname);
+      //   $('#userImg').attr('src', res.data.user_pic);
+      // })
+      user.user_message(userName, userImg, function (res) {
         console.log(res);
         $('#userName').html(res.data.nickname);
-        $('#userImg').attr('src',res.data.user_pic);      
+        $('#userImg').attr('src', res.data.user_pic);
       })
 
 
       //退出登录
       $('#btnLogout').click(function () {
-        $.post('http://localhost:8000/admin/logout', function (res) {
+        user.loginOut(function (res) {
           console.log(res);
           if (res.code == 200) {
             $('#myModal').modal('show');
-            $('#ff1').click(function() { 
-                window.location.href = './login.html';
+            $('#ff1').click(function () {
+              window.location.href = './login.html';
             })
-            $('#ff').click(function(){
+            $('#ff').click(function () {
               return;
             })
           }
-        })
+        });
       })
     })
   </script>
