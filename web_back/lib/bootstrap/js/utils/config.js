@@ -3,5 +3,8 @@ var url = 'http://localhost:8000';
 var type = {
     login:url+'/admin/login',
     loginOut:url+'/admin/logout',
-    user_message:url+'/admin/getuser'
+    user_message:url+'/admin/getuser',
+    category_show:url+'/admin/category_search',
+    category_add:url+'/admin/category_add',
+    category_delete:url+'/admin/category_delete'
 }
