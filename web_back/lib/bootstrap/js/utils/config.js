@@ -6,5 +6,6 @@ var type = {
     user_message:url+'/admin/getuser',
     category_show:url+'/admin/category_search',
     category_add:url+'/admin/category_add',
-    category_delete:url+'/admin/category_delete'
+    category_delete:url+'/admin/category_delete',
+    category_edit:url+'/admin/category_delete'
 }

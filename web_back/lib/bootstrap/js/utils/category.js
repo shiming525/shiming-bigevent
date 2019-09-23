@@ -14,5 +14,10 @@ var category = {
         $.post(type.category_delete,{id:id},function(res){
             callback(res);
         })
+    },
+    category_edit:function(name,slug,id,callback){
+        $.post(type.category_edit,{id:id,name:name,slug:slug},function(res){
+            callback(res);
+        })
     }
 }
