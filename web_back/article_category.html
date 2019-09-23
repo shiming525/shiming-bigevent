@@ -29,7 +29,7 @@
                     </tr>
                 </thead>
                 <tbody id="category_content">
-                    <tr>
+                    <!-- <tr>
                         <td>爱旅行</td>
                         <td>travel</td>
                         <td class="text-center">
@@ -37,12 +37,13 @@
                                 class="btn btn-info btn-xs">编辑</a>
                             <a href="javascript:deleteTr( 4 );" class="btn btn-danger btn-xs">删除</a>
                         </td>
-                    </tr>
+                    </tr> -->
                 </tbody>
                 <tfoot>
                     <tr>
                         <td colspan="3" class="text-center">
-                            <a href="#" class="btn btn-success" data-toggle="modal" data-target="#addModal">新增分类</a>
+                            <a href="#" class="btn btn-success" data-toggle="modal" id="btnShowAddModal"
+                                data-target="#addModal">新增分类</a>
                         </td>
                     </tr>
                 </tfoot>
@@ -59,6 +60,7 @@
                 </div>
                 <div class="modal-body">
                     <form id="modal_content">
+                        <input type="hidden" class="form-control" id="category_id" />
                         <div class="form-group">
                             <label for="recipient-name" class="control-label">分类名称:</label>
                             <input type="text" class="form-control" id="recipient-name">
@@ -74,12 +76,30 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" id="model_shutoff">关闭</button>
                     <button type="button" class="btn btn-primary" id="model_add">新增</button>
+
                 </div>
 
             </div>
         </div>
     </div>
 
+    <div class="modal fade delModal" id="addModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"></button>
+                    <h4 class="modal-title">删除分类</h4>
+                </div>
+                <div class="modal-body">
+                    确定要删除吗？
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" id="model_shutoff1">关闭</button>
+                    <button type="button" class="btn btn-primary" id="model_del">删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="./lib/bootstrap/js/utils/config.js"></script>
     <script src="./lib/bootstrap/js/utils/category.js"></script>
     <script src="js/lib/template-web.js"></script>
@@ -110,7 +130,7 @@
     </script>
 
     <script id="tmp" type="text/html">
-        {{each data item }}
+        {{each data item id}}   
             <tr>
                 <td>{{item.name}}</td>
                 <td>{{item.slug}}</td>
@@ -125,8 +145,7 @@
 
 
     <script>
-        var num = '添加';
-
+        var status = '添加';
         $('#divResult').hide();
         //数据显示到页面上
         function getShow() {
@@ -140,31 +159,67 @@
             getShow();
         })
 
-        // //编辑
-        // function editTr(obj) {
-        //     $('#addModal').modal('show');
-        //     $('#addModal .modal-title').html('修改分类名称');
-        //     console.log(obj);
-        //     console.log(obj.id);
-            
-        //     // category.category_edit(id,name,slug,function(res){
-        //     //     console.log(res);
-        //     //     // if(res.code==200){
-        //     //     //     console.log(res.id);
-        //     //     //     console.log(res.name);
-        //     //     //     console.log(res.slug);
-                    
-        //     //     // }
-        //     // })
-        // }
+        //删除
+        function deleteTr(id) {
+            $('.delModal').modal('show');
+            $('#model_del').click(function () {
+                category.category_delete(id, function (res) {
+                    console.log(res);
+                    if (res.code === 200) {
+                        getShow();
+                        $('.delModal').modal('hide');
+                    } else {
+                        $('#divResult').show().text(res.msg);
+                    }
+                })
+            })
+
+        }
+
+        $('#model_shutoff1').click(function () {
+            $('.delModal').modal('hide');
+            $('#divResult').hide();
+        })
+
+        //编辑
+        function editTr(obj) {
+            $('#addModal').modal('show');
+            $('#addModal .modal-title').html('修改分类名称');
+            $('#model_add').text('保存修改');
+            // console.log(obj);
+            status = '编辑';
+            $('#category_id').val(obj.id);
+            $('#recipient-name').val(obj.name);
+            $('#recipient-slug').val(obj.slug);
+            $('#divResult').hide();
+        }
 
         //增加分类
+        $('#btnShowAddModal').click(function () {
+            $('#recipient-name').val('');
+            $('#recipient-slug').val('');
+            status = '添加';
+            $('#addModal .modal-title').text('新增分类');
+            $('#addModal #model_add').text('新增');
+            // $('#modal_content').html($('#modal-body'));
+            $('#divResult').hide();
+        })
+
+        $('#model_shutoff').click(function () {
+            $('#recipient-name').val('');
+            $('#recipient-slug').val('');
+            $('#addModal').modal('hide');
+            $('#divResult').hide();
+        })
+
+        // 增加 编辑 删除 共用一个点击事件
         $('#model_add').click(function () {
             var name = $('#recipient-name').val();
             var slug = $('#recipient-slug').val();
-                if (name === '' || slug === '') {
-                    $('#divResult').show().text('名字和别名不能为空');
-                } else {
+            if (name === '' || slug === '') {
+                $('#divResult').show().text('名字和别名不能为空');
+            } else {
+                if (status === '添加') {
                     category.category_add(name, slug, function (res) {
                         if (res.code == 200) {
                             getShow();
@@ -175,34 +230,20 @@
                             $('#divResult').show().text(res.msg);
                         }
                     })
+                } else if (status === '编辑') {
+                    var id = $('#category_id').val();
+                    category.category_edit(id, name, slug, function (res) {
+                        if (res.code == 200) {
+                            $('#divResult').hide();
+                            $('#addModal').modal('hide');
+                            getShow();
+                        } else {
+                            $('#divResult').show().text(res.msg);
+                        }
+                    })
                 }
+            }
         })
-
-        $('#model_shutoff').click(function () {
-            $('#recipient-name').val('');
-            $('#recipient-slug').val('');
-            $('#addModal').modal('hide');
-            $('#divResult').hide();
-        })
-
-        //删除
-        function deleteTr(id) {
-            $('#addModal').modal('show');
-            $('#modal_content').html('确定要删除吗？');
-            $('#model_add').text('确认');
-            $('#model_add').click(function () {
-                category.category_delete(id, function (res) {
-                    console.log(res);
-                    if (res.code === 200) {
-                        getShow();
-                        $('#addModal').modal('hide');
-                    }
-                })
-            })
-            $('#model_shutoff').click(function () {
-                $('#addModal').modal('hide');
-            })
-        }
     </script>
 </body>
 
